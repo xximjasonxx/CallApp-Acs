@@ -39,7 +39,7 @@ public class HttpCallReceivedEventHandler
         var cloudEvents = CloudEvent.ParseMany(BinaryData.FromString(requestBody), skipValidation: true).ToList();
         foreach (var cloudEvent in cloudEvents)
         {
-            var callAutomationClient = new CallAutomationClient(configuration["AcsConnectionString"]);
+            var callAutomationClient = new CallAutomationClient(_configuration["AcsConnectionString"]);
             if (cloudEvent.Type == SystemEventNames.AcsIncomingCall)
             {
                 _logger.LogInformation("Received AcsIncomingCall event");

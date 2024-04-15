@@ -16,11 +16,13 @@ namespace CallApp.Functions;
 public class HttpCallbackHandler
 {
     private readonly ILogger _logger;
+    private readonly IConfiguration _configuration;
     private readonly CallAutomationClient _callAutomationClient;
 
     public HttpCallbackHandler(ILoggerFactory loggerFactory, IConfiguration configuration)
     {
         _logger = loggerFactory.CreateLogger<HttpCallbackHandler>();
+        _configuration = configuration;
         _callAutomationClient = new CallAutomationClient(configuration["AcsConnectionString"]);
     }
 
@@ -90,7 +92,7 @@ public class HttpCallbackHandler
             BaseAddress = new Uri("http://dataservice.accuweather.com"),
         };
 
-        var response = await httpClient.GetAsync($"locations/v1/cities/search?apikey=KZMOg2RXf7bAN22rOrAotZ4wOqa7IA9W&q={zipcode}");
+        var response = await httpClient.GetAsync($"locations/v1/cities/search?apikey={_configuration["AccuweatherApiKey"]}&q={zipcode}");
         response.EnsureSuccessStatusCode();
 
         var responseString = await response.Content.ReadAsStringAsync();
@@ -98,7 +100,7 @@ public class HttpCallbackHandler
         var cityName = JArray.Parse(responseString).First()["LocalizedName"].ToString();
         var stateName = JArray.Parse(responseString).First()["AdministrativeArea"]["LocalizedName"].ToString();
 
-        response = await httpClient.GetAsync($"forecasts/v1/daily/5day/{locationKey}?apikey=KZMOg2RXf7bAN22rOrAotZ4wOqa7IA9W&details=true");
+        response = await httpClient.GetAsync($"forecasts/v1/daily/5day/{locationKey}?apikey={_configuration["AccuweatherApiKey"]}&details=true");
         response.EnsureSuccessStatusCode();
         responseString = await response.Content.ReadAsStringAsync();
         
